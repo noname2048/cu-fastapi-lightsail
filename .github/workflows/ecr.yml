@@ -1,0 +1,39 @@
+name: Build and push docker to ecr
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ECR_PUSHER_ACCESS }}
+          aws-secret-access-key: ${{ secrets.ECR_PUSHER_SECRET }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Get KST date
+        id: get-kst
+        run :  echo "KST=$(TZ=Asia/Seoul date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: cu
+          IMAGE_TAG: ${{ steps.get-kst.outputs.KST }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          docker build -f backend/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG backend/.
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
