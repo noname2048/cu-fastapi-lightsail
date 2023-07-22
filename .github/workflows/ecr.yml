@@ -24,7 +24,7 @@ jobs:
 
       - name: Get KST date
         id: get-kst
-        run :  echo "KST=$(TZ=Asia/Seoul date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_OUTPUT
+        run :  echo "KST=$(TZ=Asia/Seoul date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
