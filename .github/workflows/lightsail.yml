@@ -27,7 +27,7 @@ jobs:
           docker build \
             -f Dockerfile \
             -t $IMAGE_NAME:$IMAGE_TAG \
-            backend/.
+            .
           echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
         
 
