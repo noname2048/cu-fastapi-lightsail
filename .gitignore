@@ -1,5 +1,9 @@
-.venv
+.vscode
+.idea
+
+.env
 
 poetry.lock
+.venv
 __pycache__
 .py[cod]
