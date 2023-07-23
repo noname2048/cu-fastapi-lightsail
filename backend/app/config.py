@@ -45,7 +45,7 @@ settings = Settings()
 def send_deployment_success_to_slack():
     event_at = datetime.now(tz=timezone("Asia/Seoul")).strftime("%Y-%m-%d %H:%M:%S")
     _ = requests.post(
-        url="https://hooks.slack.com/services/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",
+        url=settings.slack_webhook_url,
         json={
             "blocks": [
                 {
