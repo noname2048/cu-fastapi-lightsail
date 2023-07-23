@@ -20,12 +20,12 @@ jobs:
       - name: Build docker image
         id: build-image
         env:
-          DOCKERFILE_PATH: backend/Dockerfile
           IMAGE_NAME: backend
           IMAGE_TAG: latest
+        working-directory: backend
         run: |
           docker build
-            -f $DOCKERFILE_PATH \
+            -f Dockerfile \
             -t $IMAGE_NAME:$IMAGE_TAG \
             backend/.
           echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
@@ -52,13 +52,13 @@ jobs:
 
       - name: Create spec json 
         id: create-spec
-        working-directory: backend
         env:
           slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           version: ${{ steps.get-kst.outputs.KST }}
           backend_env: "prod"
+        working-directory: backend
         run: |
-          python create-spec.py \
+          python scripts/create-spec.py \
             --version $VERSION \
             --backend_env $BACKEND_ENV \
             --slack_webhook_url $SLACK_WEBHOOK_URL
@@ -69,7 +69,8 @@ jobs:
           service-name: cu-container-service-1
           image: ${{ steps.build-image.outputs.IMAGE }}
           label: backend
+        working-directory: backend
         run: |
           aws lightsail create-container-service-deployment \
             --service-name $SERVICE_NAME \
-            --cli-input-json file://$(pwd)/scripts/lightsail-deploy.json
+            --cli-input-json file://$(pwd)/lightsail-deploy.json

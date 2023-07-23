@@ -58,6 +58,4 @@ jobs:
         run: |
           aws lightsail create-container-service-deployment \
             --service-name $SERVICE_NAME \
-            --containers file://containers.json \
-            --public-endpoint file://public-endpoint.json \
-            --label $LABEL
+            --cli-input-json file://$(pwd)/container.json
