@@ -37,7 +37,13 @@ jobs:
           aws-access-key-id: ${{ secrets.LIGHTSAIL_PUSHER_ACCESS }}
           aws-secret-access-key: ${{ secrets.LIGHTSAIL_PUSHER_SECRET }}
           aws-region: ap-northeast-2
-      
+
+      - name: Install AWS Lightsail plugin
+        shell: bash
+        run: |
+          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl"
+          sudo chmod +x /usr/local/bin/lightsailctl
+
       - name: Push docker image
         id: push-image
         env:
