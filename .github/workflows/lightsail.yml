@@ -63,10 +63,10 @@ jobs:
           VERSION: ${{ steps.get-kst.outputs.KST }}
           BACKEND_ENV: "prod"
         working-directory: backend
-        run: |
-          python scripts/create-spec.py \
-            --version $VERSION \
-            --backend_env $BACKEND_ENV \
+        run: >
+          python scripts/create-spec.py 
+            --version $VERSION 
+            --backend_env $BACKEND_ENV 
             --slack_webhook_url $SLACK_WEBHOOK_URL
 
       - name: Deploy docker image
