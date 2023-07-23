@@ -2,7 +2,8 @@ name: Build and push docker to ecr
 
 on:
   push:
-    branches: [ "main" ]
+    paths: [ "backend/**", ".github/**" ]
+    branches: [ "deprecicated" ]
 
 jobs:
   build:
@@ -11,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (lightsail)
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.ECR_PUSHER_ACCESS }}
@@ -34,6 +35,29 @@ jobs:
           IMAGE_TAG: ${{ steps.get-kst.outputs.KST }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          docker build -f backend/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG backend/.
+          docker build  \
+            -f backend/Dockerfile \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            backend/.
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials (lightsail)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.LIGHTSAIL_PUSHER_ACCESS }}
+          aws-secret-access-key: ${{ secrets.LIGHTSAIL_PUSHER_SECRET }}
+          aws-region: ap-northeast-2
+      
+      - name: Deploy docker image
+        id: deploy-image
+        env:
+          service-name: cu-container-service-1
+          image: ${{ steps.build-image.outputs.IMAGE }}
+          label: backend
+        run: |
+          aws lightsail create-container-service-deployment \
+            --service-name $SERVICE_NAME \
+            --containers file://containers.json \
+            --public-endpoint file://public-endpoint.json \
+            --label $LABEL

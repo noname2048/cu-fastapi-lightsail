@@ -1,0 +1,75 @@
+name: Build and push lightsail and deploy
+
+on:
+  push:
+    paths: [ "backend/**", ".github/**" ]
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get kst
+        id: get-kst
+        run: |
+          echo "KST=$(TZ=Asia/Seoul date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_OUTPUT
+
+      - name: Build docker image
+        id: build-image
+        env:
+          DOCKERFILE_PATH: backend/Dockerfile
+          IMAGE_NAME: backend
+          IMAGE_TAG: latest
+        run: |
+          docker build
+            -f $DOCKERFILE_PATH \
+            -t $IMAGE_NAME:$IMAGE_TAG \
+            backend/.
+          echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        
+
+      - name: Configure AWS credentials (lightsail)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.LIGHTSAIL_PUSHER_ACCESS }}
+          aws-secret-access-key: ${{ secrets.LIGHTSAIL_PUSHER_SECRET }}
+          aws-region: ap-northeast-2
+      
+      - name: Push docker image
+        id: push-image
+        env:
+          service-name: cu-container-service-1
+          image: ${{ steps.build-image.outputs.IMAGE }}
+          label: backend
+        run: |
+          aws lightsail push-container-image \
+            --service-name $SERVICE_NAME \
+            --image $IMAGE \
+            --label $LABEL 
+
+      - name: Create spec json 
+        id: create-spec
+        working-directory: backend
+        env:
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          version: ${{ steps.get-kst.outputs.KST }}
+          backend_env: "prod"
+        run: |
+          python create-spec.py \
+            --version $VERSION \
+            --backend_env $BACKEND_ENV \
+            --slack_webhook_url $SLACK_WEBHOOK_URL
+
+      - name: Deploy docker image
+        id: deploy-image
+        env:
+          service-name: cu-container-service-1
+          image: ${{ steps.build-image.outputs.IMAGE }}
+          label: backend
+        run: |
+          aws lightsail create-container-service-deployment \
+            --service-name $SERVICE_NAME \
+            --cli-input-json file://$(pwd)/scripts/lightsail-deploy.json
