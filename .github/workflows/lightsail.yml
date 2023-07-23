@@ -47,9 +47,9 @@ jobs:
       - name: Push docker image
         id: push-image
         env:
-          service-name: cu-container-service-1
-          image: ${{ steps.build-image.outputs.IMAGE }}
-          label: backend
+          SERVICE_NAME: cu-container-service-1
+          IMAGE: ${{ steps.build-image.outputs.IMAGE }}
+          LABEL: backend
         run: |
           aws lightsail push-container-image \
             --service-name $SERVICE_NAME \
@@ -59,9 +59,9 @@ jobs:
       - name: Create spec json 
         id: create-spec
         env:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          version: ${{ steps.get-kst.outputs.KST }}
-          backend_env: "prod"
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          VERSION: ${{ steps.get-kst.outputs.KST }}
+          BACKEND_ENV: "prod"
         working-directory: backend
         run: |
           python scripts/create-spec.py \
@@ -72,9 +72,9 @@ jobs:
       - name: Deploy docker image
         id: deploy-image
         env:
-          service-name: cu-container-service-1
-          image: ${{ steps.build-image.outputs.IMAGE }}
-          label: backend
+          SERVICE_NAME: cu-container-service-1
+          IMAGE: ${{ steps.build-image.outputs.IMAGE }}
+          LABEL: backend
         working-directory: backend
         run: |
           aws lightsail create-container-service-deployment \
