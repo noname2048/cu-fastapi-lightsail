@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    paths: [ "backend/**" ]
+    paths: [ "backend/**/*.py" ]
   
 env:
   AWS_LIGHTSAIL_SERVICE_NAME: cu-container-service-1
