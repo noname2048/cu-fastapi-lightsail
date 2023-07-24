@@ -1,0 +1,29 @@
+version: "3.8"
+
+volumes:
+  postgres-data-volumn:
+
+services:
+  cu-postgres:
+    image: postgres:15.3
+    volumes:
+      - postgres-data-volumn:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+
+  cu-backend:
+    depends_on:
+      - cu-postgres
+    image: cu-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: postgresql://postgres:postgres@cu-postgres:5432/postgres
+      version: ${VERSION:-0.0.1}
+    ports:
+      - ${BACKEND_PORT:-8080}:80
