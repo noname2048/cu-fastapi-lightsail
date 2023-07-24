@@ -12,6 +12,7 @@ env:
   IMAGE: backend:latest
   BACKEND_ENV: prod
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  DB_URL: ${{ secrets.DB_URL }}
 
 jobs:
   build:
@@ -71,7 +72,8 @@ jobs:
           jq \
           ' .containers.cu.environment.version = "${{ env.VERSION }}"
           | .containers.cu.environment.backend_env = "${{ env.BACKEND_ENV }}"
-          | .containers.cu.environment.slack_webhook_url = "${{ env.SLACK_WEBHOOK_URL}}"' \
+          | .containers.cu.environment.slack_webhook_url = "${{ env.SLACK_WEBHOOK_URL}}"
+          | .containers.cu.environment.db_url = "${{ env.DB_URL}}"' \
           container.json > lightsail-deploy.json
       -
         name: Deploy docker image

@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+    paths: [ "backend/**" ]
+    branches: [ "main" ]
+  
+env:
+  AWS_LIGHTSAIL_SERVICE_NAME: cu-container-service-1
+  IMAGE_NAME: backend
+  IMAGE_TAG: latest
+  IMAGE: backend:latest
+  BACKEND_ENV: ci
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  DB_URL: ${{ secrets.DB_URL }}
+  VERSION: ${{ github.base_ref }} 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v2
+      - 
+        name: Set up Python
+        uses: actions/setup-python@v4
+        with: 
+          python-version: '3.11'
+      - 
+        name: Install poetry
+        uses: abatilo/actions-poetry@v2
+      - 
+        name: Setup a local virtual environment (if no poetry.toml file)
+        working-directory: ./backend
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      -
+        uses: actions/cache@v3
+        name: cache virtualenv
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+      - 
+        name: Install the project dependencies
+        working-directory: ./backend
+        run: |
+          poetry install
+      - 
+        name: run pytest
+        working-directory: ./backend
+        run: |
+          poetry run pytest
