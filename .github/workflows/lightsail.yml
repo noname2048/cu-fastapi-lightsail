@@ -27,9 +27,6 @@ jobs:
         run: |
           echo "KST=$(TZ=Asia/Seoul date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_OUTPUT
       -
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       -
@@ -40,6 +37,8 @@ jobs:
           context: "{{defaultContext}}:backend"
           push: false
           tags: ${{ env.IMAGE }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       -
         name: Configure AWS credentials (lightsail)
         uses: aws-actions/configure-aws-credentials@v1
