@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 import requests
@@ -10,7 +9,7 @@ from pytz import timezone
 
 class Settings(BaseSettings):
     version: str = "invalid"
-    backend_env: str = Field("local", pattern=r"^(local|dev|stage|prod)$")
+    backend_env: str = Field("local", pattern=r"^(local|ci|dev|stage|prod)$")
     start_at: str = Field(
         default_factory=lambda: datetime.now(tz=timezone("Asia/Seoul")).strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -18,6 +17,7 @@ class Settings(BaseSettings):
     )
     timezone: str = "Asia/Seoul"
     slack_webhook_url: str = "invalid"
+    db_url: str = "invalid"
 
     @classmethod
     def settings_customise_sources(
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
         )
 
     class Config:
-        env_file = ".env"
+        env_file = ".env.local"
         env_file_encoding = "utf-8"
 
 
