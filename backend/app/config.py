@@ -50,6 +50,7 @@ async def send_deployment_success_to_slack(delay: int = 60):
 
     for _ in range(60):
         await asyncio.sleep(delay)
+        print("Try to send deployment success message to slack")
         res = requests.post(
             url=settings.slack_webhook_url,
             json={
