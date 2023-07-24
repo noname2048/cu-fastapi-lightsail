@@ -18,7 +18,6 @@ class SensorRecordCreateRequest(BaseModel):
     uuid: UUID4
     temperature: float
     humidity: float
-    created_at: datetime
 
 
 class SensorRecordListParam(BaseModel):
