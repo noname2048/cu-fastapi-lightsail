@@ -23,3 +23,8 @@ app.include_router(api_router, tags=["api"], prefix="/api")
 def startup_event():
     if settings.backend_env != "local":
         send_deployment_success_to_slack()
+    else:
+        print("Running in local environment")
+        from .database import Base, engine
+
+        Base.metadata.create_all(bind=engine)

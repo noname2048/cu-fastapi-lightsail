@@ -3,7 +3,6 @@ name: CI
 on:
   pull_request:
     paths: [ "backend/**" ]
-    branches: [ "main" ]
   
 env:
   AWS_LIGHTSAIL_SERVICE_NAME: cu-container-service-1
@@ -12,12 +11,22 @@ env:
   IMAGE: backend:latest
   BACKEND_ENV: ci
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  DB_URL: ${{ secrets.DB_URL }}
+  DB_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
   VERSION: ${{ github.base_ref }} 
 
 jobs:
-  build:
+  CI:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+
     steps:
       - 
         uses: actions/checkout@v2
