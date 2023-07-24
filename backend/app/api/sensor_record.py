@@ -39,7 +39,7 @@ async def list_sensor_record(
 
 
 @router.post("")
-async def retrieve_sensor(body: SensorRecordCreateRequest = Body(...)):
+async def create_sensor_record(body: SensorRecordCreateRequest = Body(...)):
     with SessionLocal() as session:
         stmt = select(Sensor).where(Sensor.uuid == body.uuid)
         sensor = session.execute(stmt).scalar_one_or_none()
