@@ -58,7 +58,7 @@ jobs:
         id: push-image
         run: |
           aws lightsail push-container-image \
-            --service-name $SERVICE_NAME \
+            --service-name $AWS_LIGHTSAIL_SERVICE_NAME \
             --image $IMAGE \
             --label $IMAGE_NAME 
       -
@@ -79,5 +79,5 @@ jobs:
         working-directory: backend/scripts
         run: |
           aws lightsail create-container-service-deployment \
-            --service-name $SERVICE_NAME \
+            --service-name $AWS_LIGHTSAIL_SERVICE_NAME \
             --cli-input-json file://$(pwd)/lightsail-deploy.json
