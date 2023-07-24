@@ -3,10 +3,10 @@
 
 .env
 
-poetry.lock
 .venv
 __pycache__
 .py[cod]
 
 *.sh
 lightsail-deploy.json
+backend/local
