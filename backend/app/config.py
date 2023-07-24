@@ -45,7 +45,10 @@ settings = Settings()
 
 async def send_deployment_success_to_slack(delay: int = 60):
     event_at = datetime.now(tz=timezone("Asia/Seoul")).strftime("%Y-%m-%d %H:%M:%S")
-    for _ in range(3):
+    if settings.slack_webhook_url == "invalid":
+        return
+
+    for _ in range(60):
         await asyncio.sleep(delay)
         res = requests.post(
             url=settings.slack_webhook_url,
