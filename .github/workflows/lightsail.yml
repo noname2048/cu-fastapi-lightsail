@@ -5,77 +5,78 @@ on:
     paths: [ "backend/**", ".github/**" ]
     branches: [ "main" ]
 
+env:
+  AWS_LIGHTSAIL_SERVICE_NAME: cu-container-service-1
+  IMAGE_NAME: backend
+  IMAGE_TAG: latest
+  IMAGE: backend:latest
+  BACKEND_ENV: prod
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Get kst
+      -
+        uses: actions/checkout@v3
+        name: Checkout
+      -
+        name: Get kst
         id: get-kst
         run: |
           echo "KST=$(TZ=Asia/Seoul date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_OUTPUT
-
-      - name: Build docker image
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Build docker image
+        uses: docker/build-push-action@v4
         id: build-image
-        env:
-          IMAGE_NAME: backend
-          IMAGE_TAG: latest
-        working-directory: backend
-        run: |
-          docker build \
-            -f Dockerfile \
-            -t $IMAGE_NAME:$IMAGE_TAG \
-            .
-          echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
-        
-
-      - name: Configure AWS credentials (lightsail)
+        with: 
+          context: "{{defaultContext}}:backend"
+          push: false
+          tags: $IMAGE
+      -
+        name: Configure AWS credentials (lightsail)
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.LIGHTSAIL_PUSHER_ACCESS }}
           aws-secret-access-key: ${{ secrets.LIGHTSAIL_PUSHER_SECRET }}
           aws-region: ap-northeast-2
-
-      - name: Install AWS Lightsail plugin
+      -
+        name: Install AWS Lightsail plugin
         shell: bash
         run: |
           curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl"
           sudo chmod +x /usr/local/bin/lightsailctl
-
-      - name: Push docker image
+      -
+        name: Push docker image
         id: push-image
-        env:
-          SERVICE_NAME: cu-container-service-1
-          IMAGE: ${{ steps.build-image.outputs.IMAGE }}
-          LABEL: backend
         run: |
           aws lightsail push-container-image \
             --service-name $SERVICE_NAME \
             --image $IMAGE \
-            --label $LABEL 
-
-      - name: Create spec json 
+            --label $IMAGE_NAME 
+      -
+        name: Create spec json 
         id: create-spec
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           VERSION: ${{ steps.get-kst.outputs.KST }}
-          BACKEND_ENV: "prod"
-        working-directory: backend
-        run: >
-          python scripts/create-spec.py 
-            --version $VERSION 
-            --backend_env $BACKEND_ENV 
-            --slack_webhook_url $SLACK_WEBHOOK_URL
-
-      - name: Deploy docker image
+        working-directory: backend/scripts
+        run: |
+          jq -i \
+          '.containers.cu.environment.version = $VERSION 
+          | .containers.cu.environment.backend_env = $BACKEND_ENV
+          | .containers.cu.environment.slack_webhook_url = "new_slack_webhook_url"' \
+          container.json
+      -
+        name: Deploy docker image
         id: deploy-image
-        env:
-          SERVICE_NAME: cu-container-service-1
-          IMAGE: ${{ steps.build-image.outputs.IMAGE }}
-          LABEL: backend
-        working-directory: backend
+        working-directory: backend/scripts
         run: |
           aws lightsail create-container-service-deployment \
             --service-name $SERVICE_NAME \
