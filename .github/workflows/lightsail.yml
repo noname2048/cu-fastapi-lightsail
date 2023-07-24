@@ -2,7 +2,7 @@ name: Build and push lightsail and deploy
 
 on:
   push:
-    paths: [ "backend/**", ".github/**" ]
+    paths: [ "backend/**" ]
     branches: [ "main" ]
 
 env:
