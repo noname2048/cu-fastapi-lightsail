@@ -1,0 +1,27 @@
+{
+  "containers": {
+    "cu": {
+      "image": ":cu-container-service-1.backend.latest",
+      "environment": {
+        "version": "",
+        "backend_env": "",
+        "slack_webhook_url": ""
+      },
+      "ports": {
+        "80": "HTTP"
+      }
+    }
+  },
+  "publicEndpoint": {
+    "containerName": "cu",
+    "containerPort": 80,
+    "healthCheck": {
+      "healthyThreshold": 2,
+      "unhealthyThreshold": 2,
+      "timeoutSeconds": 5,
+      "intervalSeconds": 10,
+      "path": "/health",
+      "successCodes": "200"
+    }
+  }
+}
