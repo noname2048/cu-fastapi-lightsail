@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -20,9 +22,9 @@ app.include_router(api_router, tags=["api"], prefix="/api")
 
 
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     if settings.backend_env != "local":
-        send_deployment_success_to_slack()
+        asyncio.create_task(send_deployment_success_to_slack, delay=60)
     else:
         print("Running in local environment")
         from .database import Base, engine
