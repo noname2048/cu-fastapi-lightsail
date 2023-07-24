@@ -68,11 +68,11 @@ jobs:
           VERSION: ${{ steps.get-kst.outputs.KST }}
         working-directory: backend/scripts
         run: |
-          jq -i \
+          jq \
           '.containers.cu.environment.version = $VERSION 
           | .containers.cu.environment.backend_env = $BACKEND_ENV
           | .containers.cu.environment.slack_webhook_url = "new_slack_webhook_url"' \
-          container.json
+          container.json > lightsail-deploy.json
       -
         name: Deploy docker image
         id: deploy-image
