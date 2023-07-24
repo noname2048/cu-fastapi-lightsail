@@ -39,7 +39,7 @@ jobs:
         with: 
           context: "{{defaultContext}}:backend"
           push: false
-          tags: $IMAGE
+          tags: ${{ env.IMAGE }}
       -
         name: Configure AWS credentials (lightsail)
         uses: aws-actions/configure-aws-credentials@v1
