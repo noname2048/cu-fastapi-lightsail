@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 import requests
@@ -42,65 +43,71 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def send_deployment_success_to_slack():
+async def send_deployment_success_to_slack(delay: int = 60):
     event_at = datetime.now(tz=timezone("Asia/Seoul")).strftime("%Y-%m-%d %H:%M:%S")
-    _ = requests.post(
-        url=settings.slack_webhook_url,
-        json={
-            "blocks": [
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": ":white_check_mark: 새로운 서버가 시작되었습니다.",
+    for _ in range(3):
+        await asyncio.sleep(delay)
+        res = requests.post(
+            url=settings.slack_webhook_url,
+            json={
+                "blocks": [
+                    {
+                        "type": "header",
+                        "text": {
+                            "type": "plain_text",
+                            "text": ":white_check_mark: 새로운 서버가 시작되었습니다.",
+                        },
                     },
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
+                    {
+                        "type": "context",
+                        "elements": [
+                            {
+                                "type": "mrkdwn",
+                                "text": f"*일시:* {event_at} | *버전*: {settings.version} | *환경*: {settings.backend_env}",
+                            },
+                        ],
+                    },
+                    {"type": "divider"},
+                    {
+                        "type": "section",
+                        "text": {
                             "type": "mrkdwn",
-                            "text": f"*일시:* {event_at} | *버전*: {settings.version} | *환경*: {settings.backend_env}",
+                            "text": "🏠 *INDEX* | https://cu.noname2048.com",
                         },
-                    ],
-                },
-                {"type": "divider"},
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "🏠 *INDEX* | https://cu.noname2048.com",
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "바로가기",
+                                "emoji": True,
+                            },
+                            "url": "https://cu.noname2048.com",
+                            "value": "go_to_index",
+                            "action_id": "go_to_index",
+                        },
                     },
-                    "accessory": {
-                        "type": "button",
+                    {
+                        "type": "section",
                         "text": {
-                            "type": "plain_text",
-                            "text": "바로가기",
-                            "emoji": True,
+                            "type": "mrkdwn",
+                            "text": "🚀 *API 문서* | https://cu.noname2048.com/docs",
                         },
-                        "url": "https://cu.noname2048.com",
-                        "value": "go_to_index",
-                        "action_id": "go_to_index",
-                    },
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "🚀 *API 문서* | https://cu.noname2048.com/docs",
-                    },
-                    "accessory": {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "바로가기",
-                            "emoji": True,
+                        "accessory": {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "바로가기",
+                                "emoji": True,
+                            },
+                            "url": "https://cu.noname2048.com/docs",
+                            "value": "go_to_docs",
+                            "action_id": "go_to_docs",
                         },
-                        "url": "https://cu.noname2048.com/docs",
-                        "value": "go_to_docs",
-                        "action_id": "go_to_docs",
                     },
-                },
-            ],
-        },
-    )
+                ],
+            },
+            timeout=5,
+        )
+
+        if 200 <= res.status_code < 300:
+            break
