@@ -69,9 +69,9 @@ jobs:
         working-directory: backend/scripts
         run: |
           jq \
-          ' .containers["cu-container-service-1"].environment.version = ${{ env.VERSION }}}
-          | .containers["cu-container-service-1"].environment.backend_env = ${{ env.BACKEND_ENV }}
-          | .containers["cu-container-service-1"].environment.slack_webhook_url = ${{ env.SLACK_WEBHOOK_URL}}' \
+          ' .containers.cu.environment.version = ${{ env.VERSION }}}
+          | .containers.cu.environment.backend_env = ${{ env.BACKEND_ENV }}
+          | .containers.cu.environment.slack_webhook_url = ${{ env.SLACK_WEBHOOK_URL}}' \
           container.json > lightsail-deploy.json
       -
         name: Deploy docker image
