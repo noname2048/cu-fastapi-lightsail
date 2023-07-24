@@ -12,7 +12,7 @@ env:
 
 jobs:
   cron:
-    runs-on: ubu
+    runs-on: ubuntu-latest
 
     steps:
       - 
