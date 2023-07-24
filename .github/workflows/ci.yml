@@ -11,11 +11,11 @@ env:
   IMAGE: backend:latest
   BACKEND_ENV: ci
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  DB_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+  DB_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
   VERSION: ${{ github.base_ref }} 
 
 jobs:
-  build:
+  CI:
     runs-on: ubuntu-latest
     services:
       postgres:
