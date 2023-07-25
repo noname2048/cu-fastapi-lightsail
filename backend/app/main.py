@@ -25,7 +25,7 @@ app.include_router(api_router, tags=["api"], prefix="/api")
 @app.on_event("startup")
 async def startup_event():
     if settings.backend_env != "local":
-        asyncio.create_task(send_deployment_success_to_slack(delay=60))
+        asyncio.create_task(send_deployment_success_to_slack())
     else:
         print("Running in local environment")
         from .database import Base, engine

@@ -67,7 +67,7 @@ def get_server_start(event_at: str, version: str, backend_env: str):
     }
 
 
-async def send_deployment_success_to_slack(delay: int = 60):
+async def send_deployment_success_to_slack(delay: int = 10):
     if not settings.slack_webhook_url.startswith("https://"):
         return
 
@@ -78,7 +78,7 @@ async def send_deployment_success_to_slack(delay: int = 60):
         backend_env=settings.backend_env,
     )
 
-    for _ in range(60):
+    for i in range(60):
         await asyncio.sleep(delay)
         res = requests.post(
             url=settings.slack_webhook_url,
@@ -86,6 +86,12 @@ async def send_deployment_success_to_slack(delay: int = 60):
             timeout=5,
         )
         if res.status_code == 200:
+            requests.post(
+                url=settings.slack_webhook_url,
+                json={"text": f"🎉 배포 성공! ({i}번째시도)"},
+                timeout=5,
+            )
             return
+
         else:
             print(f"failed to send slack, {res.status_code}, {res.text}")
