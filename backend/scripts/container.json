@@ -6,7 +6,8 @@
         "version": "",
         "backend_env": "",
         "slack_webhook_url": "",
-        "db_url": ""
+        "db_url": "",
+        "allow_origins": ""
       },
       "ports": {
         "80": "HTTP"

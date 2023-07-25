@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     timezone: str = "Asia/Seoul"
     slack_webhook_url: str = "invalid"
     db_url: str = "invalid"
+    allow_origins: list[str] = [""]
 
     @classmethod
     def settings_customise_sources(
@@ -34,7 +35,7 @@ class Settings(BaseSettings):
         )
 
     class Config:
-        env_file = ".env.local"
+        env_file = (".env.local", ".env")
         env_file_encoding = "utf-8"
 
 
