@@ -13,6 +13,7 @@ env:
   BACKEND_ENV: prod
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
   DB_URL: ${{ secrets.DB_URL }}
+  ALLOW_ORIGINS: noname2048.dev
 
 jobs:
   build:
@@ -73,7 +74,8 @@ jobs:
           ' .containers.cu.environment.version = "${{ env.VERSION }}"
           | .containers.cu.environment.backend_env = "${{ env.BACKEND_ENV }}"
           | .containers.cu.environment.slack_webhook_url = "${{ env.SLACK_WEBHOOK_URL}}"
-          | .containers.cu.environment.db_url = "${{ env.DB_URL}}"' \
+          | .containers.cu.environment.db_url = "${{ env.DB_URL}}"
+          | .containers.cu.environment.allow_origins = ${{ env.ALLOW_ORIGINS }}' \
           container.json > lightsail-deploy.json
       -
         name: Deploy docker image
