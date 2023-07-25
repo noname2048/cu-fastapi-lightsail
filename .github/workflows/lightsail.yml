@@ -1,4 +1,4 @@
-name: Build and push lightsail and deploy
+name: Build, Push, Deploy (Lightsail)
 
 on:
   push:
@@ -15,7 +15,7 @@ env:
   DB_URL: ${{ secrets.DB_URL }}
 
 jobs:
-  build:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:

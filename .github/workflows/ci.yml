@@ -1,4 +1,4 @@
-name: CI
+name: Integration Test (Pytest)
 
 on:
   pull_request:
@@ -48,7 +48,7 @@ jobs:
         uses: actions/cache@v3
         name: cache virtualenv
         with:
-          path: ./.venv
+          path: backend/.venv
           key: venv-${{ hashFiles('poetry.lock') }}
       - 
         name: Install the project dependencies
