@@ -5,9 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from .api.index import router as api_router
-from .config import send_deployment_success_to_slack, settings
+from .config import settings
 from .index import router as http_router
 from .middleware import add_useful_headers
+from app.slack import send_deployment_success_to_slack
 
 app = FastAPI()
 app.add_middleware(
