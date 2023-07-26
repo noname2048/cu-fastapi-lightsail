@@ -75,7 +75,7 @@ jobs:
           | .containers.cu.environment.backend_env = "${{ env.BACKEND_ENV }}"
           | .containers.cu.environment.slack_webhook_url = "${{ env.SLACK_WEBHOOK_URL}}"
           | .containers.cu.environment.db_url = "${{ env.DB_URL}}"
-          | .containers.cu.environment.allow_origins = ${{ env.ALLOW_ORIGINS }}' \
+          | .containers.cu.environment.allow_origins = "${{ env.ALLOW_ORIGINS }}"' \
           container.json > lightsail-deploy.json
       -
         name: Deploy docker image

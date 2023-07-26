@@ -13,7 +13,7 @@ from app.slack import send_deployment_success_to_slack
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allow_origins,
+    allow_origins=settings.allow_origins.split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )
