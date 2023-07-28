@@ -13,7 +13,7 @@ env:
   BACKEND_ENV: prod
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
   DB_URL: ${{ secrets.DB_URL }}
-  ALLOW_ORIGINS: noname2048.dev
+  ALLOW_ORIGINS: https://noname2048.dev
 
 jobs:
   build-push-deploy:
