@@ -8,6 +8,7 @@ from sqlalchemy import select
 from ..database import SessionLocal
 from ..models import Sensor, SensorRecord
 from ..schemas import SensorRecordCreateRequest, SensorRecordListParam
+from app.ws import publish
 
 router = APIRouter()
 
@@ -53,5 +54,13 @@ async def create_sensor_record(body: SensorRecordCreateRequest = Body(...)):
         session.add(db_sensor_record)
         session.commit()
         session.refresh(db_sensor_record)
+        publish(
+            db_sensor_record.uuid,
+            {
+                "temperaure": db_sensor_record.temperature,
+                "humidity": db_sensor_record.humidity,
+                "created_at": db_sensor_record.created_at,
+            },
+        )
 
     return db_sensor_record
