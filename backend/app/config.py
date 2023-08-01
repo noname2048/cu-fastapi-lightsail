@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic_settings.sources import PydanticBaseSettingsSource
 from pytz import timezone
 
@@ -34,9 +34,11 @@ class Settings(BaseSettings):
             init_settings,  # init
         )
 
-    class Config:
-        env_file = (".env.local", ".env")
-        env_file_encoding = "utf-8"
+    model_config: SettingsConfigDict = SettingsConfigDict(
+        extra="ignore",
+        env_file=(".env.local", ".env"),
+        env_file_encoding="utf-8",
+    )
 
 
 settings = Settings()
