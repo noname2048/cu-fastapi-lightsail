@@ -26,10 +26,11 @@ def unsubscribe(topic: str, ws):
 
 async def publish(topic: str, data: dict):
     """topic에 해당하는 모든 구독자에게 data를 전송합니다."""
-    target_ws_list = topic2ws_list.get(topic, [])
-    await asyncio.gather(
-        *[send_data(ws=ws, data=data, topic=topic) for ws in target_ws_list]
-    )
+    if topic != BROADCAST:
+        target_ws_list = topic2ws_list.get(topic, [])
+        await asyncio.gather(
+            *[send_data(ws=ws, data=data, topic=topic) for ws in target_ws_list]
+        )
     # broadcast
     target_ws_list = topic2ws_list.get(BROADCAST, [])
     await asyncio.gather(
