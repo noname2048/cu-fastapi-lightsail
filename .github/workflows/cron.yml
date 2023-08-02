@@ -27,13 +27,7 @@ jobs:
           aws-region: ap-northeast-2
       -
         name: Delete old lightsail images
+        working-directory: ./bckend/scripts
         run: |
-          IMAGES=$(aws lightsail get-container-images --service-name $SERVICE_NAME | jq -r '.containerImages[] | .image')
-          echo $IMAGES
-          IMAGES_TO_DELETE=$(echo $IMAGES | tail -n +4)
-          echo #IMAGES_TO_DELETE
-          for IMAGE in $IMAGES_TO_DELETE
-          do
-            echo $IMAGE
-            aws lightsail delete-container-image --service-name $SERVICE_NAME --image $IMAGE
-          done
+          sh ./delete-images.sh
+          
