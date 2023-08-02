@@ -12,9 +12,10 @@ from app.slack import send_deployment_success_to_slack
 from app.ws import router as ws_router
 
 app = FastAPI()
+allow_origins: list[str] = settings.allow_origins.split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allow_origins.split(","),
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

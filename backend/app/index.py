@@ -1,6 +1,7 @@
-from app.config import settings
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
+
+from app.config import settings
 
 router = APIRouter()
 
@@ -19,3 +20,11 @@ async def root():
 @router.get("/health", response_class=HTMLResponse)
 async def healtcheck():
     return "<h1>OK</h1>"
+
+
+@router.get("/status", response_class=HTMLResponse)
+async def status():
+    return f"""
+    <h1>status</h1>
+    <p>cors: {settings.allow_origins.split(",")}</p>
+    """
