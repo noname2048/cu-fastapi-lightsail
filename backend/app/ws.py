@@ -5,8 +5,8 @@ from fastapi import APIRouter, Path, WebSocket
 
 router = APIRouter()
 
-topic2ws_list: dict[str, list[WebSocket]] = {}
 BROADCAST = "broadcast"
+topic2ws_list: dict[str, list[WebSocket]] = {BROADCAST: []}
 
 
 def subscribe(topic: str, ws):
@@ -28,14 +28,13 @@ async def publish(topic: str, data: dict):
     """topic에 해당하는 모든 구독자에게 data를 전송합니다."""
     if topic != BROADCAST:
         target_ws_list = topic2ws_list.get(topic, [])
-        await asyncio.gather(
-            *[send_data(ws=ws, data=data, topic=topic) for ws in target_ws_list]
-        )
+        tasks = [send_data(ws=ws, data=data, topic=topic) for ws in target_ws_list]
+        await asyncio.gather(*tasks)
+
     # broadcast
     target_ws_list = topic2ws_list.get(BROADCAST, [])
-    await asyncio.gather(
-        send_data(ws=ws, data=data, topic=BROADCAST) for ws in target_ws_list
-    )
+    tasks = [send_data(ws=ws, data=data, topic=BROADCAST) for ws in target_ws_list]
+    await asyncio.gather(*tasks)
 
 
 async def send_data(ws: WebSocket, data: dict, topic: str):
@@ -86,6 +85,7 @@ async def websocket_topic(websocket: WebSocket, topic: str = Path(...)):
 @router.websocket("/ws/broadcast")
 async def websocket_broadcast(websocket: WebSocket):
     await websocket.accept()
+    subscribe(BROADCAST, websocket)
     while True:
         try:
             resp = await websocket.receive_json()
@@ -94,3 +94,4 @@ async def websocket_broadcast(websocket: WebSocket):
             print("error:", err)
             break
     print("Bye..")
+    unsubscribe(BROADCAST, websocket)
