@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, BackgroundTasks, Body, Path, Query, status
 from fastapi.exceptions import HTTPException
 from pydantic import UUID4
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from ..database import SessionLocal
 from ..models import Sensor, SensorRecord
-from ..schemas import SensorRecordCreateRequest, SensorRecordListParam
+from ..schemas import SensorRecordCreateRequest
 from app.ws import publish
 
 router = APIRouter()
@@ -62,6 +62,7 @@ async def create_sensor_record(
             publish,
             topic=str(db_sensor_record.uuid),
             data={
+                "uuid": str(db_sensor_record.uuid),
                 "temperaure": db_sensor_record.temperature,
                 "humidity": db_sensor_record.humidity,
                 "created_at": db_sensor_record.created_at.isoformat(),

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import UUID4, BaseModel
+from pydantic import UUID4, BaseModel, ConfigDict
 
 
 class SensorCreateRequest(BaseModel):
@@ -20,6 +20,10 @@ class SensorRecordCreateRequest(BaseModel):
     humidity: float
 
 
-class SensorRecordListParam(BaseModel):
+class SensorWithLastResponse(Sensor):
     uuid: UUID4
-    days: Optional[int] = 1
+    temperature: Optional[float]
+    humidity: Optional[float]
+    last: Optional[datetime]
+
+    model_config: ConfigDict = ConfigDict(extra="ignore")
