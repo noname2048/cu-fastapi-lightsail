@@ -12,9 +12,9 @@ class Sensor(Base):
 
     uuid: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(30))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now, onupdate=datetime.now
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
     is_active = mapped_column(Boolean, default=True)
 
@@ -28,6 +28,6 @@ class SensorRecord(Base):
     uuid: Mapped[UUID] = mapped_column(ForeignKey("sensor.uuid"))
     temperature: Mapped[float] = mapped_column(Float)
     humidity: Mapped[float] = mapped_column(Float)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     sensor: Mapped["Sensor"] = relationship(back_populates="sensor_record")
