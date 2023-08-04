@@ -27,7 +27,7 @@ jobs:
           aws-region: ap-northeast-2
       -
         name: Delete old lightsail images
-        working-directory: ./bckend/scripts
+        working-directory: ./backend/scripts
         run: |
           sh ./delete-images.sh
           
