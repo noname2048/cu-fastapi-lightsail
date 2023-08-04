@@ -12,6 +12,7 @@ class Sensor(Base):
 
     uuid: Mapped[UUID] = mapped_column(UUID, primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(30))
+    alias: Mapped[str] = mapped_column(String(30), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
