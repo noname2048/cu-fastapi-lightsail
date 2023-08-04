@@ -28,5 +28,6 @@ class SensorWithLastResponse(Sensor):
     temperature: Optional[float]
     humidity: Optional[float]
     last: Optional[datetime]
+    is_active: bool
 
     model_config: ConfigDict = ConfigDict(extra="ignore")
