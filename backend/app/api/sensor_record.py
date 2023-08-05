@@ -19,7 +19,6 @@ router = APIRouter()
 @router.get("")
 async def list_sensor_record(
     uuid: UUID4 = Query(...),
-    days: int = Query(1, ge=1, le=30),
 ):
     with SessionLocal() as session:
         stmt = select(Sensor).where(Sensor.uuid == uuid)
@@ -29,7 +28,7 @@ async def list_sensor_record(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Sensor not found"
             )
         le = datetime.utcnow()
-        ge = le - timedelta(days=days)
+        ge = le - timedelta(hours=24)
         stmt = (
             select(SensorRecord)
             .where(SensorRecord.uuid == sensor.uuid)
@@ -73,3 +72,38 @@ async def create_sensor_record(
         )
 
     return db_sensor_record
+
+
+@router.get("/query")
+async def query_sensor_record(
+    uuid: UUID4 = Query(...),
+    duration_hours: int = Query(24, selectable=[1, 2, 3, 6, 12, 24, 48]),
+    interval_minutes: int = Query(1, selectable=[1, 2, 3, 5, 10, 12, 15, 20, 30]),
+):
+    sql = text(
+        f"""
+        select *
+        from (
+            select *, row_number() over (
+                partition by date_trunc('hour', created_at) + interval '{interval_minutes} min' * floor(date_part('minute', created_at) / {interval_minutes})
+                order by created_at desc
+                ) as rn
+            from sensor_record
+            where created_at > now() - interval '{duration_hours} hour' and
+                uuid = '{uuid}'
+            ) tmp
+        where rn = 1;
+        """
+    )
+
+    with SessionLocal() as session:
+        statement = select(Sensor).where(Sensor.uuid == uuid)
+        sensor: Sensor | None = session.execute(statement).scalar_one_or_none()
+        if not sensor:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Sensor not found"
+            )
+        rows = session.execute(sql).all()
+
+    sensor_records: list[SensorRecord] = [row._mapping for row in rows]
+    return sensor_records
