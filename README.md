@@ -16,3 +16,8 @@
 ![](docs/erd.png)
 
 supabase와 gui를 이용해 따로 migration 관리를 하지 않았습니다.
+
+### 동작화면
+
+- 거실에어콘 작동시 나타나는 특정 패턴 (26도로 설정)
+- ![Alt text](docs/example.png)
