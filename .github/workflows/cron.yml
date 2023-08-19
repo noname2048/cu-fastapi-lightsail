@@ -5,7 +5,8 @@ on:
     # 실제 스케쥴 작업이 시작될 cron을 등록하면 됩니다.
     # 크론은 https://crontab.guru/ 여기서 확인하면 좋을 것 같습니다.
     # 이 크론은 평일 5시 (한국시간 17시)에 실행됩니다.
-    - cron: '0 8 * * *'
+    # 해당 시간에 +9를 하면 KST가 됩니다.
+    - cron: "0 8 * * *"
 
 env:
   SERVICE_NAME: cu-container-service-1
@@ -15,19 +16,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - 
-        name: Checkout
-        uses: actions/checkout@v2
-      -
-        name: Configure AWS credentials (lightsail)
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials (lightsail)
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.LIGHTSAIL_PUSHER_ACCESS }}
           aws-secret-access-key: ${{ secrets.LIGHTSAIL_PUSHER_SECRET }}
           aws-region: ap-northeast-2
-      -
-        name: Delete old lightsail images
+
+      - name: Delete old lightsail images
+        id: delete 
         working-directory: ./backend/scripts
         run: |
-          sh ./delete-images.sh
-          
+          aws lightsail get-container-images  \
+            --service-name cu-container-service-1 \
+            | jq -r '.containerImages[] | .image' \
+            | tail -n +5
+            > images.txt
+          images=$(cat images.txt)          
+          for image in $images
+          do
+              echo "delete $image"
+              aws lightsail delete-container-image --service-name cu-container-service-1 --image $image
+          done          
+          echo "deleted_image_count=$image_count" >> $GITHUB_OUTPUT
+
+      - name: Send slack message if deleted image exists
+        if: ${{ steps.delete.outputs.deleted_image_count }} > 0
+        uses: slackapi/slack-github-action@v1.24.0
+        env:
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "[workflow] ${{ github.workflow }}\n[job] ${{ github.job }}\n[status] ${{ job.status }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Deleted ${{ steps.delete.outputs.deleted_image_count }} images"
+                  }
+                }
+              ]
+            }
