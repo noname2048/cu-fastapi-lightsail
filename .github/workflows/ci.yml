@@ -2,7 +2,7 @@ name: Integration Test (Pytest)
 
 on:
   pull_request:
-    paths: [ "backend/**/*.py" ]
+    branches: [ main ]
   
 env:
   AWS_LIGHTSAIL_SERVICE_NAME: cu-container-service-1
@@ -28,35 +28,56 @@ jobs:
           - 5432:5432
 
     steps:
-      - 
-        uses: actions/checkout@v2
-      - 
-        name: Set up Python
+      - uses: actions/checkout@v3
+
+      - name: Check for changes in backend/**/*.py 
+        id: check_changes
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          changed_files=$(git diff --name-only FETCH_HEAD..HEAD)
+          echo "changed files: $changed_files"
+          if echo "$(changed_files)" | grep -qE "backend/.*\.py$"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Python
+        if: steps.check_changes.outputs.changed == 'true'
         uses: actions/setup-python@v4
         with: 
           python-version: '3.11'
-      - 
-        name: Install poetry
+
+      - name: Install poetry
+        if: steps.check_changes.outputs.changed == 'true'
         uses: abatilo/actions-poetry@v2
-      - 
-        name: Setup a local virtual environment (if no poetry.toml file)
+
+      - name: Setup a local virtual environment (if no poetry.toml file)
+        if: steps.check_changes.outputs.changed == 'true'
         working-directory: ./backend
         run: |
           poetry config virtualenvs.create true --local
           poetry config virtualenvs.in-project true --local
-      -
-        uses: actions/cache@v3
+
+      - uses: actions/cache@v3
+        if: steps.check_changes.outputs.changed == 'true'
         name: cache virtualenv
         with:
           path: backend/.venv
           key: venv-${{ hashFiles('poetry.lock') }}
-      - 
-        name: Install the project dependencies
+
+      - name: Install the project dependencies
+        if: steps.check_changes.outputs.changed == 'true'
         working-directory: ./backend
         run: |
           poetry install
-      - 
-        name: run pytest
+
+      - name: run pytest
+        if: steps.check_changes.outputs.changed == 'true'
         working-directory: ./backend
         run: |
           poetry run pytest
+
+      - name: No changes in backend/**/*.py
+        if: steps.check_changes.outputs.changed == 'false'
+        run: echo "No changes in backend/**/*.py. CI is successful."
