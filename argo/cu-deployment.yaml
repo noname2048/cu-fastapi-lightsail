@@ -18,5 +18,8 @@ spec:
           image: ghcr.io/noname2048/cu:latest
           ports:
             - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: cu-configmap
       imagePullSecrets:
         - name: ghcr-secret
