@@ -9,14 +9,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cu
+      app: cu-app
   template:
     metadata:
       labels:
         app: cu-app
     spec:
       containers:
-        - name: cu-app
+        - name: cu-container
           image: ghcr.io/noname2048/cu:latest
           ports:
             - containerPort: 80
