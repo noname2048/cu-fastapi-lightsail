@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: cu-deployment
   namespace: cu
-  labels:
-    app: cu
 spec:
   replicas: 1
   selector:
